@@ -155,3 +155,13 @@ class TestSeller(TransactionCase):
         vendors.write({'product_id': False})
         self.assertEqual(vendors, self.product_consu.seller_ids,
             "Setting the product_id to False shouldn't affect seller_ids.")
+
+    def test_60_prepare_sellers_new_record(self):
+        """Vendor lines that tie on sequence, min_qty and price must also be
+        sortable on a new record, as in an onchange of the product form."""
+        vendors = self.env['product.supplierinfo'].create([{
+            'partner_id': partner.id,
+            'product_tmpl_id': self.product_consu.product_tmpl_id.id,
+        } for partner in (self.camptocamp, self.asustec)])
+        new_product = self.product_consu.new(origin=self.product_consu)
+        self.assertEqual(new_product._prepare_sellers()._origin.ids, vendors.ids)
